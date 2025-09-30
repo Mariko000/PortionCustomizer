@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}マイアカウント{% endblock %}
+
+{% block content %}
+<div class="container my-3">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h3 class="text-center mb-4">マイアカウント</h3>
+            <div class="card p-4 overflow-auto" style="max-height: 70vh;">
+                <h3 class="card-title">こんにちは、{{ user.username }}さん！</h3>
+                {% comment %} ログイン状態を正確に判定する {% endcomment %}
+                {% if request.user.is_authenticated %}
+                    <span class="text-green-500 font-medium">● オンライン</span>
+                {% else %}
+                    <span class="text-gray-500">未ログイン</span>
+                {% endif %}
+                
+                {% comment %} 最終ログイン時間を表示（オプション） {% endcomment %}
+                {% if user.last_login %}
+                    <p class="text-gray-500">最終ログイン: {{ user.last_login|naturaltime }}</p>
+                {% endif %}
+
+                <div class="text-center mb-4">
+                  {% if profile_user.avatar %}
+                  <img src="{{ profile_user.avatar_thumbnail.url }}" alt="avatar" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover;">
+                  {% else %}
+                  <img src="{% static 'images/default_avatar.svg' %}" alt="avatar" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover;">
+                  {% endif %}
+                </div>
+                <hr>
+                <p><strong>ユーザー名:</strong> {{ user.username }}</p>
+                <p><strong>メールアドレス:</strong> {{ user.email }}</p>
+                <p>レベル: {{ profile_user.status_level }}</p><p>ポイント: {{ profile_user.points }}</p>
+                <p><strong>ポイントを消費してレベルアップ</strong></p>
+                <a href="{% url 'users:unlock-next' %}" class="no-underline">レベルアップする？</a>
+
+
+                <p>
+                  <div style="display: flex; align-items: flex-start; gap: 40px;">
+                  
+                      <!-- フォロワー -->
+                      <div>
+                        <strong>フォロワー:</strong> {{ followers_count }}
+                        <div style="display: inline-flex; gap: 5px; margin-left: 5px;">
+                          {% for user in followers|slice:":5" %}
+                            <a href="{% url 'users:user_profile_detail' user.id %}">
+                              {% if user.avatar %}
+                                <img src="{{ user.avatar_thumbnail.url }}"
+                                     alt="{{ user.username }}"
+                                     style="width:50px; height:50px; border-radius:50%; object-fit:cover;">
+                              {% else %}
+                                <img src="{% static 'images/default_avatar.svg' %}"
+                                     alt="{{ user.username }}"
+                                     style="width:50px; height:50px; border-radius:50%; object-fit:cover;">
+                              {% endif %}
+                            </a>
+                          {% endfor %}
+                          {% if followers_count > 5 %}
+                            <a href="{% url 'users:user_profile_other' profile_user.id %}?tab=followers">もっと見る…</a>
+                          {% endif %}
+                        </div>
+                      </div>
+                    
+                      <!-- フォロー中 -->
+                      <div>
+                        <strong>フォロー:</strong> {{ following_count }}
+                        <div style="display: inline-flex; gap: 5px; margin-left: 5px;">
+                          {% for user in following|slice:":5" %}
+                            <a href="{% url 'users:user_profile_detail' user.id %}">
+                              {% if user.avatar %}
+                                <img src="{{ user.avatar_thumbnail.url }}"
+                                     alt="{{ user.username }}"
+                                     style="width:50px; height:50px; border-radius:50%; object-fit:cover;">
+                              {% else %}
+                                <img src="{% static 'images/default_avatar.svg' %}"
+                                     alt="{{ user.username }}"
+                                     style="width:50px; height:50px; border-radius:50%; object-fit:cover;">
+                              {% endif %}
+                            </a>
+                          {% endfor %}
+                          {% if following_count > 5 %}
+                            <a href="{% url 'users:user_profile_other' profile_user.id %}?tab=following">もっと見る…</a>
+                          {% endif %}
+                        </div>
+                      </div>
+                  
+                  </div>
+                  
+                <p>
+                    <strong>興味のあるもの:</strong>
+                    {% if tags %}
+                      {% for tag in tags %}
+                        <span class="badge bg-primary">{{ tag }}</span>
+                      {% endfor %}
+                    {% else %}
+                      <span>まだ登録されていません</span>
+                    {% endif %}
+                  </p>                  
+                <p><strong>自己紹介:</strong></p>
+                <p>{{ user.bio|default:"まだ自己紹介がありません。" }}</p>
+                <a href="{% url 'account_logout' %}" class="btn btn-danger mt-3">ログアウト</a>
+                <hr>
+                <a href="{% url 'users:profile_update' %}" class="btn btn-primary mt-3">プロフィールを編集</a>
+                <a href="{% url 'users:login_calendar' %}" class="btn btn-info mt-3">ログイン履歴カレンダーを見る</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+  .no-underline {
+      text-decoration: none;
+      color: #4CAF50; /* 好きな色に変更可 */
+      font-weight: 600; /* 強調したい場合 */
+  }
+  
+  .no-underline:hover {
+      color: #388E3C; /* ホバー時の色変更も可能 */
+  }
+  </style>
+  
+{% endblock %}

@@ -1,0 +1,189 @@
+/* ================================
+  BODY 全体背景（Djangoテンプレート対応）
+=============================== */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+body.d-flex {
+  background-color: #3A7CD5; /* 元ブルーより濃く落ち着かせた色 */
+  position: relative;
+  filter: saturate(0.9) brightness(1.05);
+  color: #fff;
+  font-family: 'M PLUS Rounded 1c';
+}
+
+main { flex: 1 0 auto; }
+
+body.d-flex::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* background: url("../images/background.png") center/contain repeat;*/
+  opacity: 0.2; /* パターンは控えめに */
+  z-index: -1;
+}
+
+/* ================================
+  ヘッダー/フッター
+=============================== */
+.site-header,
+.site-footer {
+  background-color: #357a38; /* 蛍光グリーンを落ち着いたトーンに変更 */
+  z-index: 1000;
+}
+
+/* ================================
+  ブランドタイトル
+=============================== */
+.navbar-brand {
+  font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', sans-serif;
+  font-weight: bold;
+  font-size: 2rem;
+  color: white;
+
+}
+
+/* ================================
+  ナビリンク
+=============================== */
+.nav-link {
+  color: white;
+  font-weight: bold;
+}
+
+.nav-link:hover {
+  color: #FFC107; /* アクセントは控えめ黄色 */
+}
+
+/* ================================
+  ドロップダウン
+=============================== */
+.dropdown-menu {
+  border-radius: 8px;
+  border: 1px solid #FFC107;
+}
+
+.dropdown-item:hover {
+  background-color: #FFC107;
+  color: #1A1A1A;
+}
+
+/* ================================
+  CTAボタン
+=============================== */
+.btn-cta {
+  background-color: #1976D2; /* 落ち着いたブルー */
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-cta:hover {
+  background-color: #155fa0;
+  transform: translateY(-1px);
+}
+
+/* ================================
+  検索バー
+=============================== */
+.custom-search-input {
+  width: 250px;
+  border-radius: 8px;
+  border: 1px solid #FFC107;
+  padding: 6px 10px;
+}
+
+.btn-outline-greige {
+  border: 1px solid #FFC107;
+  background-color: transparent;
+  color: #444444;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-greige:hover {
+  background-color: #FFC107;
+  color: #1A1A1A;
+}
+
+/* text-muted の上書き */
+.text-muted { color: #fff !important; }
+
+/* ================================
+  ガチャ本体
+=============================== */
+.gacha-container {
+  width: 600px;
+  max-width: 95%;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.capsule {
+  width: 80px;
+  max-width: 15vw;
+}
+
+/* ================================
+  レスポンシブ調整
+=============================== */
+/* タブレット 768px以下 */
+/* ------------------------------
+  小さい画面でタイトル中央
+  toggleバーは左寄せのまま
+------------------------------ */
+
+/* タブレット 768px以下 */
+@media (max-width: 768px) {
+  .site-header .navbar-brand {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+  }
+
+  /* 検索バーやユーザー情報は下に折り返す場合 */
+  .navbar-nav.ms-auto {
+    margin-top: 50px; /* タイトル下にスペースを確保 */
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+/* スマホ 480px以下 */
+@media (max-width: 480px) {
+  .site-header .navbar-brand {
+    font-size: 1.2rem;
+  }
+
+  .navbar-nav.ms-auto {
+    margin-top: 45px; /* タイトル下にスペース確保 */
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* 小さい画面でタイトルを中央固定 */
+@media (max-width: 992px) {
+  .title-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    text-align: center;
+    white-space: nowrap;
+    z-index: 1000; /* toggleバーより前面 */
+  }
+}
+
+@media (max-width: 480px) {
+  .title-center {
+    font-size: 1.2rem;
+  }
+}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+<div class="container about-section">
+    <h3 class="mb-3 text-center">About</h3>
+  
+    <section class="mb-3 fade-in">
+      <h5 class="section-title">
+        <i class="fas fa-cogs me-2 text-primary"></i><span class="typing-text">技術スタック</span>
+      </h5>
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            <li><strong>バックエンド:</strong> Django + HTML</li>
+            <li><strong>フロントエンド:</strong> 一部 Vue.js</li>
+            <li><strong>開発環境:</strong> Visual Studio Code</li>
+            <li><strong>データベース:</strong> SQLite</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  
+    <section class="mb-3 fade-in">
+      <h5 class="section-title">
+        <i class="fas fa-lightbulb me-2 text-warning"></i><span class="typing-text">選定理由</span>
+      </h5>
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <p class="mb-0">
+            Python/Djangoでセキュリティを確保しつつ、HTMLやVue.jsでデザインの柔軟性と実装のしやすさを両立。
+          </p>
+        </div>
+      </div>
+    </section>
+  
+    <section class="fade-in">
+      <h5 class="section-title">
+        <i class="fas fa-list-check me-2 text-success"></i><span class="typing-text">主な機能</span>
+      </h5>
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <ul>
+            <li>ユーザー認証（登録・ログイン・パスワードリセット・ログイン日数カウント）</li>
+            <li>ユーザープロファイル（アバター・誕生日・自己紹介）</li>
+            <li>ブログ・SNS機能（投稿・コメント・いいね・フォロー・通知）</li>
+            <li>RESTful API（Django REST Framework使用）</li>
+            <li>検索機能、コンタクトフォーム、エラーページ404、静的/メディア管理</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+<style>
+.about-section .section-title {
+  border-left: 4px solid #4A90E2;
+  padding-left: 10px;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+</style>
+
+    
+{% endblock %}

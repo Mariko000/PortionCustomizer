@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}ユーザーリスト{% endblock %}
+
+{% block content %}
+<main class="container my-4">
+
+  <!-- ========================= -->
+  <!-- おすすめユーザーセクション -->
+  <!-- ========================= -->
+  <div>
+    <h4 class="h6 fw-bold mb-3">おすすめユーザー</h4>
+    <div class="row flex-nowrap overflow-auto pb-2">
+      {% for user in recommended_users %}
+  <div class="col-auto text-center flex-shrink-0" style="width: 90px;">
+    <a href="{% url 'users:user_profile_detail' user.id %}" class="text-decoration-none d-block">
+      <div class="text-center mb-1">
+        {% if user.avatar %}
+          <img src="{{ user.avatar.url }}" alt="avatar"
+               style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
+        {% else %}
+          <img src="{% static 'images/default_avatar.svg' %}" alt="avatar"
+               style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
+        {% endif %}
+      </div>
+      <div class="text-dark small text-truncate" style="max-width: 80px;">{{ user.username }}</div>
+    </a>
+    <div class="mt-1 small text-muted">
+      {% if user.prefetched_user_tags %}
+        {% for ut in user.prefetched_user_tags|slice:":1" %}
+          <span>#{{ ut.tag.name }}</span>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+{% endfor %}
+
+    </div>
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- 全ユーザーリストセクション -->
+  <!-- ========================= -->
+  <div>
+    <h2 class="h3 fw-bold mb-4">ユーザーリスト</h2>
+    <div id="user-list-grid" class="row">
+      {% if users %}
+      {% for user in users %}
+      <div class="col-6 col-sm-4 col-md-3 col-lg-2 text-center flex-shrink-0">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <a href="{% url 'users:user_profile_detail' user.id %}">
+              <div class="text-center mb-2">
+                {% if user.avatar %}
+                  <img src="{{ user.avatar.url }}" alt="avatar"
+                       style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover;">
+                {% else %}
+                  <img src="{% static 'images/default_avatar.svg' %}" alt="avatar"
+                       style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover;">
+                {% endif %}
+              </div>
+            </a>
+            <div class="fw-semibold mb-1">{{ user.username }}</div>
+            <div class="text-muted small mb-2">
+              フォロワー: <span class="followers-count" data-user-id="{{ user.id }}">{{ user.followers_count }}</span> /
+              フォロー: {{ user.following_count }}
+            </div>
+    
+            <div class="mb-2">
+              {% if user.prefetched_user_tags %}
+                {% for ut in user.prefetched_user_tags|slice:":3" %}
+                  <span class="badge bg-primary">#{{ ut.tag.name }}</span>
+                {% endfor %}
+              {% else %}
+                <span class="text-muted">タグなし</span>
+              {% endif %}
+            </div>
+    
+            {% if user.id != request.user.id %}
+              <div class="d-grid gap-2">
+                <button type="button"
+                        class="btn follow-btn {% if user.is_following %}btn-secondary{% else %}btn-primary{% endif %}"
+                        data-user-id="{{ user.id }}"
+                        data-is-following="{% if user.is_following %}true{% else %}false{% endif %}">
+                  {% if user.is_following %}フォロー中{% else %}フォロー{% endif %}
+                </button>
+                {% if user.is_blocked %}
+                  <button class="btn btn-warning unblock-btn" data-user-id="{{ user.id }}">ブロック解除</button>
+                {% else %}
+                  <button class="btn btn-danger block-btn" data-user-id="{{ user.id }}">ブロック</button>
+                {% endif %}
+              </div>
+              <a href="{% url 'messengers:conversation' user.id %}" class="btn btn-outline-primary mt-2">メッセージを送る</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    
+      {% else %}
+        <div class="col-12 text-center py-5 text-muted">
+          <p>該当するユーザーが見つかりませんでした。</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // CSRFトークン取得関数
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + "=")) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const csrftoken = getCookie("csrftoken");
+
+    // フォロー/フォロー解除機能
+document.querySelectorAll(".follow-btn").forEach(button => {
+  button.addEventListener("click", async () => {
+    const userId = button.dataset.userId;
+    let isFollowing = button.dataset.isFollowing === "true";
+
+    if (isFollowing && !confirm("フォローを解除しますか？")) return;
+
+    const url = isFollowing 
+    ? `/api/followers/unfollow/${userId}/`
+    : `/api/followers/follow/${userId}/`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrftoken,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+      });
+
+      if (response.ok) {
+        const followerCountElement = document.querySelector(`.followers-count[data-user-id="${userId}"]`);
+        let currentCount = parseInt(followerCountElement.textContent);
+
+        if (isFollowing) {
+          button.textContent = "フォロー";
+          button.dataset.isFollowing = "false";
+          button.classList.replace("btn-secondary", "btn-primary");
+          followerCountElement.textContent = currentCount - 1;
+        } else {
+          button.textContent = "フォロー中";
+          button.dataset.isFollowing = "true";
+          button.classList.replace("btn-primary", "btn-secondary");
+          followerCountElement.textContent = currentCount + 1;
+        }
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message);
+      }
+    } catch (error) {
+      alert("通信エラーが発生しました。");
+    }
+  });
+});
+
+// ブロック/ブロック解除機能
+document.querySelectorAll(".block-btn, .unblock-btn").forEach(button => {
+  button.addEventListener("click", async () => {
+    const userId = button.dataset.userId;
+    const isBlocking = button.classList.contains('block-btn');
+
+    const confirmMessage = isBlocking ? "このユーザーをブロックしますか？" : "このユーザーのブロックを解除しますか？";
+    if (!confirm(confirmMessage)) return;
+
+    const url = isBlocking 
+    ? `/api/followers/block/${userId}/`
+    : `/api/followers/unblock/${userId}/`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrftoken,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+      });
+
+      if (response.ok) {
+        if (isBlocking) {
+          button.textContent = "ブロック解除";
+          button.classList.remove("btn-danger", "block-btn");
+          button.classList.add("btn-warning", "unblock-btn");
+        } else {
+          button.textContent = "ブロック";
+          button.classList.remove("btn-warning", "unblock-btn");
+          button.classList.add("btn-danger", "block-btn");
+        }
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message);
+      }
+    } catch (error) {
+      alert("通信エラーが発生しました。");
+    }
+  });
+});
+
+  });
+</script>
+{% endblock %}

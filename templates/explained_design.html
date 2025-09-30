@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Design & Theme{% endblock %}
+
+{% block content %}
+<div class="container about-section">
+  <h3 class="mb-3 text-center">Design & Theme</h3>
+
+  <!-- デザインテーマ -->
+  <section class="mb-3 fade-in">
+    <h5 class="section-title">
+      <i class="fas fa-palette me-2 text-primary"></i> <span class="typing-text">デザインテーマ</span>
+    </h5>
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <p>
+          アプリ全体は余白とタイポグラフィを重視したシンプルなデザインです。<br>
+          派手な装飾を避けることで、コンテンツに自然と目が集中するように設計しています。<br>
+          ユーザーの操作を妨げず、直感的に理解できるレイアウトを意識しました。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- フォント -->
+  <section class="mb-3 fade-in">
+    <h5 class="section-title">
+      <i class="fas fa-font me-2 text-warning"></i><span class="typing-text">フォント</span>
+    </h5>
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <ul class="list-unstyled mb-0">
+          <li><strong>日本語フォント:</strong> M PLUS Rounded 1c / 読みやすさと親しみやすさを両立</li>
+          <li><strong>英語フォント:</strong> Roboto / モダンでシンプルな印象を演出</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- カラーパレット -->
+  <section class="fade-in">
+    <h5 class="section-title">
+      <i class="fas fa-fill-drip me-2 text-success"></i><span class="typing-text">カラーパレット</span>
+    </h5>
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <ul>
+          <li><strong>テーマ:</strong>ページ全体は青系の背景パターンで、文字色は白に設定されています。活動的な印象を与えつつも清涼感のある印象で、<br>
+            文字が背景に映えるデザインを目指しました。</li>
+          
+          <li><strong>アクセントカラー:</strong> #68D391（蛍光グリーン） / CTAボタンやリンクの強調用</li>
+          <li><strong>補助カラー:</strong> #2BB1FF（エナジーブルー） / ユーザーの目線誘導やポイント表示に使用</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<style>
+/* about.html と同様のスタイルを適用 */
+.about-section .section-title {
+  border-left: 4px solid #4A90E2;
+  padding-left: 10px;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+/* フェードイン演出 */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const elements = document.querySelectorAll(".fade-in");
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+      }
+    });
+  }, { threshold: 0.2 });
+  elements.forEach(el => observer.observe(el));
+});
+</script>
+{% endblock %}

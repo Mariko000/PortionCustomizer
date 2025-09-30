@@ -1,0 +1,49 @@
+<!-- apps/templates/messengers/base_messenger.html -->
+<!--2カラムの枠組み を用意して、inbox.html と conversation.html を include する-->
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}ベース{% endblock %}
+
+{% block content %}
+<div class="messenger-container">
+    <div class="sidebar">
+      {% include "messengers/inbox.html" %}
+    </div>
+    <div class="chatbox">
+      {% block conversation %}{% endblock %}
+    </div>
+  </div>
+
+<style>
+
+.messenger-container {
+  display: flex;
+  height: calc(100vh - 60px); /* header/footer除く高さ */
+}
+
+.sidebar {
+  width: 30%;
+  border-right: 1px solid #ccc;
+  overflow-y: auto;
+}
+
+.chatbox {
+  flex: 1;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .messenger-container {
+    display: block;
+  }
+  .sidebar, .chatbox {
+    width: 100%;
+  }
+}
+
+
+</style>
+{% endblock %}
+  

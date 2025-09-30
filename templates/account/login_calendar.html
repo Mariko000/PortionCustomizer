@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ログイン履歴カレンダー{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="text-center mb-4">ログイン履歴カレンダー</h1>
+            <div class="card p-4">
+                <p class="text-center">ログインするとスタンプが押されます！</p>
+                <div id="calendar-container"></div>
+            </div>
+            <div class="text-center mt-3">
+                <a href="{% url 'users:user_profile' %}" class="btn btn-secondary">プロフィールに戻る</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
+<style>
+    /* FullCalendarのスタイルを調整 */
+    #calendar-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .fc-daygrid-day-number {
+        font-weight: bold;
+    }
+    .login-day {
+        position: relative;
+    }
+    .stamp-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2.5rem;
+        color: #ff6347; /* トマト色 */
+        pointer-events: none;
+        opacity: 0.8;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar-container');
+        // Djangoのテンプレートから直接JSONデータを変数に渡す
+        var loginDates = {{ login_dates|safe }};
+        
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'ja',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth'
+            },
+            events: loginDates.map(function(dateStr) {
+                return {
+                    start: dateStr,
+                    allDay: true,
+                    title: 'ログイン',
+                };
+            }),
+            dayCellContent: function(arg) {
+                var formattedDate = FullCalendar.formatDate(arg.date, {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).replace(/\//g, '-');
+                
+                if (loginDates.includes(formattedDate)) {
+                    // ログインした日にスタンプの絵文字を追加
+                    return { html: '<span class="stamp-overlay">&#127808;</span>' };
+                }
+                return { html: '' };
+            }
+        });
+        calendar.render();
+    });
+</script>
+{% endblock %}

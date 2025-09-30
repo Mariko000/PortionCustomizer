@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}サーバーエラー{% endblock %}
+
+{% block content %}
+<div class="container my-5 text-center">
+    <h1 class="display-1 fw-bold">500</h1>
+    <p class="fs-3"> <span class="text-danger">申し訳ありません！</span> サーバーでエラーが発生しました。</p>
+    <p class="lead">
+        現在、技術的な問題が発生しています。しばらくしてから再度お試しください。
+    </p>
+    <a href="{% url 'home' %}" class="btn btn-primary mt-3">ホームに戻る</a>
+</div>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}レベルアップする（15ポイント）{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<div class="levelup-container">
+    <div class="levelup-card">
+        <h2>レベルアップに挑戦！</h2>
+        <p>15ポイントを消費して次のレベルに進みます</p>
+        <button id="levelUpBtn" data-csrf="{{ csrf_token }}" class="button primary">
+            レベルアップする
+        </button>
+        <div id="result" class="result"></div>
+    </div>
+</div>
+{% else %}
+<p>ログインしてください。</p>
+{% endif %}
+
+<script>
+document.getElementById("levelUpBtn")?.addEventListener("click", () => {
+    const csrftoken = document.getElementById("levelUpBtn").dataset.csrf;
+    fetch("/users/api/level-up/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({ points_to_use: 15 })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("result").innerText =
+            data.level_up
+            ? `レベルアップしました！現在レベル${data.current_level} 残ポイント${data.remaining_points}`
+            : `ポイント不足か最大レベルに達しています。残ポイント${data.remaining_points}`;
+    });
+});
+</script>
+
+<style>
+/* ===========================
+  レベルアップ画面全体
+=========================== */
+.levelup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  min-height: 70vh;
+}
+
+/* ===========================
+  カードスタイル
+=========================== */
+.levelup-card {
+  background:#ffffff;
+  border-radius: 20px;
+  padding: 30px 25px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.levelup-card h2 {
+  font-size: 1.8em;
+  color: #4CAF50;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.levelup-card p {
+  font-size: 1.1em;
+  color: #555;
+  margin-bottom: 25px;
+}
+
+/* ===========================
+  ボタン
+=========================== */
+.button {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1em;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.button.primary {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  box-shadow: 0 6px 15px rgba(76,175,80,0.3);
+}
+
+.button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(76,175,80,0.4);
+}
+
+/* ===========================
+  結果表示
+=========================== */
+.result {
+  margin-top: 20px;
+  font-weight: 600;
+  font-size: 1.1em;
+  color: #FF5722;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %}

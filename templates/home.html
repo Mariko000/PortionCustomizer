@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}ホーム{% endblock %}
+
+{% block content %}
+
+<section class="hero text-center py-5">
+  <div class="container">
+    <!--黒（0, 0, 0）の影を透過度0.5（50%）で表示-->
+    <h1 class="fw-bold display-5 welcome-heading" style="text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">
+      座りすぎ注意！<br>
+      運動ガチャで遊びながら<br>
+      リフレッシュ！
+    </h1>
+
+    <!--<a href="{% url 'about_page' %}" class="btn-custom mt-3">
+        <span>about</span>
+      </a>
+    -->
+      
+  </div>
+</section>
+<style>
+  /* ぼやけながらフェードインするアニメーションの定義 */
+  @keyframes blur-in {
+    0% {
+      opacity: 0;
+      filter: blur(20px);
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+  }
+
+  /* アニメーションを適用するクラス */
+  .welcome-heading.animate {
+    animation: blur-in 1.5s ease-in-out forwards;
+  }
+</style>
+
+<script>
+  // ページ読み込み後にアニメーションを適用
+  document.addEventListener("DOMContentLoaded", function() {
+    const welcomeHeading = document.querySelector('.welcome-heading');
+    welcomeHeading.classList.add('animate');
+  });
+</script>
+{% endblock %}

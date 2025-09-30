@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}プロフィール編集{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="text-center mb-4">プロフィールを編集</h1>
+            <div class="card p-4">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <div class="d-grid gap-2 d-md-block mt-3">
+                        <button type="submit" class="btn btn-success">更新</button>
+                        <a href="{% url 'users:user_profile' %}" class="btn btn-secondary">キャンセル</a>
+                    </div>
+
+                    <hr>
+                    <div class="d-grid gap-2 d-md-block mt-3">
+                        <a href="{% url 'account_change_password' %}" class="btn btn-warning">パスワードを変更</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

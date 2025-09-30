@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Skills{% endblock %}
+
+{% block content %}
+<div class="container about-section">
+  <h3 class="mb-3 text-center">My Skills</h3>
+
+  <!-- Languages & Frameworks -->
+  <section class="mb-3 fade-in">
+    <h5 class="section-title">
+      <i class="fas fa-code me-2 text-primary"></i><span class="typing-text">Languages & Frameworks</span>
+    </h5>
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <ul class="list-unstyled mb-0">
+          <li><strong>Python</strong> - Djangoを用いたWebアプリ開発、スクリプト作成</li>
+          <li><strong>Django</strong> - 認証機能付きアプリやREST API構築の経験</li>
+          <li><strong>JavaScript / Vue.js</strong> - ミニゲーム、Todoアプリ、状態管理（Pinia）の実装</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Frontend -->
+  <section class="mb-3 fade-in">
+    <h5 class="section-title">
+      <i class="fas fa-desktop me-2 text-warning"></i><span class="typing-text">Frontend</span>
+    </h5>
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <ul class="list-unstyled mb-0">
+          <li><strong>HTML / CSS</strong> - レスポンシブデザイン対応、Bootstrap、Font Awesome</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Design Tools -->
+  <section class="fade-in">
+    <h5 class="section-title">
+      <i class="fas fa-pen-nib me-2 text-success"></i><span class="typing-text">Design Tools</span>
+    </h5>
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <ul class="list-unstyled mb-0">
+          <li><strong>Photoshop</strong> - 画像加工</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

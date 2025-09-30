@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}チャット画面{% endblock %}
+
+{% block content %}
+
+<div class="chat-container">
+  <h2>{{ other_user.username }}とのチャット画面</h2>
+
+  <div class="messages">
+    {% for message in chat_messages %}
+      <div class="message-wrapper {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+
+        {% if message.sender != request.user %}
+          <div class="avatar text-center" style="width:48px; height:48px; border-radius:50%; overflow:hidden;">
+            {% if message.sender.avatar %}
+              <img src="{{ message.sender.avatar.url }}" alt="avatar"
+                   style="width:100%; height:100%; object-fit:cover;">
+            {% else %}
+              <img src="{% static 'images/default_avatar.svg' %}" alt="avatar"
+                   style="width:100%; height:100%; object-fit:cover;">
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <div class="message-bubble {% if message.sender == request.user %}sent{% else %}received{% endif %}">
+          <p>{{ message.content }}</p>
+          <small class="message-time">{{ message.created_at|date:"Y年m月d日 H:i" }}</small>
+        </div>
+
+        {% if message.sender == request.user %}
+          <div class="avatar text-center" style="width:48px; height:48px; border-radius:50%; overflow:hidden;">
+            {% if request.user.avatar %}
+              <img src="{{ request.user.avatar.url }}" alt="avatar"
+                   style="width:100%; height:100%; object-fit:cover;">
+            {% else %}
+              <img src="{% static 'images/default_avatar.svg' %}" alt="avatar"
+                   style="width:100%; height:100%; object-fit:cover;">
+            {% endif %}
+          </div>
+        {% endif %}
+
+      </div>
+    {% endfor %}
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <textarea name="content" placeholder="メッセージを入力..."></textarea>
+    <button type="submit">送信</button>
+  </form>
+</div>
+
+<style>
+body{
+  background-color: #fcfcfc;
+}
+main { padding-top: 20px; }
+
+/* chat-container */
+.chat-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* messages */
+.messages {
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* message-wrapper: アバターと吹き出しのコンテナ */
+.message-wrapper {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16px; /* 吹き出し間隔 */
+  gap: 10px; /* アバターと吹き出しの間の隙間 */
+}
+
+/* 送信したメッセージ */
+.message-wrapper.sent {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+/* 受信したメッセージ */
+.message-wrapper.received {
+  align-self: flex-start;
+}
+
+/* アバター画像 */
+.chat-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* メッセージ吹き出しの共通スタイル */
+.message-bubble {
+  position: relative;
+  max-width: 75%;
+  padding: 10px 15px;
+  border-radius: 20px;
+  color: #000;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+
+
+/* 送信（右）の吹き出しの三角部分 */
+.message-bubble.sent::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-left: 6px solid #dcf8c6;
+}
+
+/* 送信（右）の吹き出し */
+.message-bubble.received {
+  background-color: #f0f0f0;
+  border-bottom-left-radius: 0;
+}
+
+/* 受信（左）の吹き出し*/
+.message-bubble.sent {
+  background-color: #dcf8c6;
+  border-bottom-right-radius: 0;/* 三角形が出る角 */
+  position: relative; 
+}
+
+/* 受信（左）の吹き出しの三角部分  */
+.message-bubble.received::after {
+  content: "";
+  position: absolute;
+  left: -6px;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-left: 6px solid #f0f0f0;
+  transform: scaleX(-1); 
+}
+
+/* メッセージ内テキスト */
+.message-bubble p {
+  margin: 0;
+}
+
+/* メッセージ内の時間 */
+.message-bubble .message-time {
+  display: block;
+  font-size: 0.7rem;
+  color: #999;
+  margin-top: 5px;
+  text-align: right;
+}
+
+/* フォーム */
+form {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  display: flex;
+  gap: 8px;
+}
+textarea {
+  flex-grow: 1;
+  resize: none;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  padding: 8px;
+  font-size: 0.9rem;
+}
+button {
+  background-color: #a1a1a1;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 0.9rem;
+}
+button:hover {
+  background-color: #888888;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const messagesDiv = document.querySelector(".messages");
+  if (messagesDiv) {
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+});
+</script>
+
+{% endblock %}

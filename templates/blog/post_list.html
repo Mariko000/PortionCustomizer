@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ブログ投稿一覧{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h3 class="mb-3">ブログ投稿一覧</h3>
+
+  {% if user.is_authenticated %}
+  <div class="posts-wrapper">
+
+    <!-- ツールバー -->
+    <div class="d-flex align-items-center mb-3 p-2">
+
+      <!-- 一括選択 / 全解除 -->
+      <div class="dropdown me-2">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="selectDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fa-regular fa-square-check"></i>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="selectDropdown">
+          <li><a class="dropdown-item" href="#" id="selectAllLink">すべて選択</a></li>
+          <li><a class="dropdown-item" href="#" id="deselectAllLink">選択解除</a></li>
+        </ul>
+      </div>
+
+      <!-- 選択削除ボタン -->
+      <form id="selectedDeleteForm" action="{% url 'blog:delete_selected_posts' %}" method="post" class="d-inline me-2">
+        {% csrf_token %}
+        <input type="hidden" name="selected_posts" id="selectedIdsInput">
+        <button type="submit" class="btn btn-outline-danger">
+          <i class="fa-solid fa-trash"></i> 選択削除
+        </button>
+      </form>
+
+      <!-- 全削除ボタン（Ajax化） -->
+      <button id="deleteAllBtn" class="btn btn-outline-danger me-2">
+        <i class="fa-solid fa-trash-can"></i> 全削除
+      </button>
+
+      <!-- 並び替え -->
+      <div class="dropdown me-2">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fa-solid fa-sort"></i>
+          {% if current_sort == 'oldest' %}古い順{% elif current_sort == 'likes' %}いいね順{% elif current_sort == 'comments' %}コメント順{% else %}新しい順{% endif %}
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+          <li><a class="dropdown-item {% if current_sort == 'newest' %}active{% endif %}" href="?sort=newest">新しい順</a></li>
+          <li><a class="dropdown-item {% if current_sort == 'oldest' %}active{% endif %}" href="?sort=oldest">古い順</a></li>
+          <li><a class="dropdown-item {% if current_sort == 'comments' %}active{% endif %}" href="?sort=comments">コメント数順</a></li>
+          <li><a class="dropdown-item {% if current_sort == 'likes' %}active{% endif %}" href="?sort=likes">いいね順</a></li>
+        </ul>
+      </div>
+
+      <!-- 新しい投稿ボタン -->
+      <div class="ms-auto">
+        <a href="{% url 'blog:post_new' %}" class="btn btn-primary">
+          <i class="fa-solid fa-pen"></i> 新規投稿
+        </a>
+      </div>
+
+    </div>
+
+    <!-- 投稿リスト -->
+    <div id="postsContainer" style="max-height: 600px; overflow-y: auto;">
+      {% if posts %}
+        {% for post in posts %}
+        <div class="card mb-3" data-post-id="{{ post.pk }}">
+          <div class="card-body">
+            <div class="row g-0">
+              {% if post.image %}
+              <div class="col-md-2">
+                <img src="{{ post.image.url }}" class="img-fluid rounded-start" alt="{{ post.title }}">
+              </div>
+              <div class="col-md-10">
+              {% else %}
+              <div class="col-md-12">
+              {% endif %}
+                <div class="card-body">
+                  <h2 class="card-title">
+                    <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+                  </h2>
+                  <p class="card-text">
+                    <small class="text-muted">
+                      投稿者: {{ post.author.username }} | {{ post.created_at|date:"Y年m月d日" }}
+                    </small>
+                  </p>
+                  <p>{{ post.content|truncatechars:150 }}</p>
+
+                  <div class="d-flex align-items-center mt-2">
+                    <!-- 選択削除用チェックボックス -->
+                    <input type="checkbox" class="form-check-input me-2" name="selected_posts_checkbox" value="{{ post.pk }}">
+
+                    <!-- コメント数 -->
+                    <span class="me-3">
+                      <i class="fa-solid fa-comment"></i> {{ post.comments.count }}
+                    </span>
+
+                    <!-- いいねボタン -->
+                    {% if user.is_authenticated %}
+                    <form action="{% url 'blog:post_like' pk=post.pk %}" method="post" class="d-inline like-btn-form">
+                      {% csrf_token %}
+                      <button type="submit"
+                              class="btn btn-link text-decoration-none p-0 like-btn"
+                              data-post-id="{{ post.pk }}"
+                              style="color: inherit;">
+                        {% if user in post.in_likes %}
+                          <i class="fa-solid fa-thumbs-up text-primary"></i>
+                        {% else %}
+                          <i class="fa-regular fa-thumbs-up"></i>
+                        {% endif %}
+                        <span class="likes-count">{{ post.likes.count }}</span>
+                      </button>
+                    </form>
+                    {% else %}
+                    <i class="fa-regular fa-thumbs-up"></i> {{ post.likes.count }}
+                    {% endif %}
+
+                    <!-- 編集ボタン -->
+                    {% if user == post.author %}
+                    <a href="{% url 'blog:post_edit' pk=post.pk %}" class="btn btn-sm btn-outline-secondary">編集</a>
+                    <!-- 選択削除のチェックボックスも投稿者のみ表示 -->
+                    <input type="checkbox" class="form-check-input me-2" name="selected_posts_checkbox" value="{{ post.pk }}">
+                    {% endif %}
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-center">まだ投稿がありません。</p>
+      {% endif %}
+    </div>
+
+  </div>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const selectAllLink = document.getElementById("selectAllLink");
+  const deselectAllLink = document.getElementById("deselectAllLink");
+  const selectedDeleteForm = document.getElementById("selectedDeleteForm");
+  const selectedIdsInput = document.getElementById("selectedIdsInput");
+  const deleteAllBtn = document.getElementById("deleteAllBtn");
+  const postsContainer = document.getElementById("postsContainer");
+
+  // 一括選択 / 全解除
+  selectAllLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.querySelectorAll("input[name='selected_posts_checkbox']").forEach(cb => cb.checked = true);
+  });
+  deselectAllLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.querySelectorAll("input[name='selected_posts_checkbox']").forEach(cb => cb.checked = false);
+  });
+
+  // 選択削除（Ajax）
+  selectedDeleteForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const ids = Array.from(document.querySelectorAll("input[name='selected_posts_checkbox']:checked"))
+                   .map(cb => cb.value);
+
+  if(ids.length === 0){
+    alert("削除する投稿を選択してください");
+    return;
+  }
+
+  fetch(selectedDeleteForm.action, {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+      "X-Requested-With": "XMLHttpRequest",
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({selected_posts: ids.join(",")})
+  })
+  .then(res => {
+    if(!res.ok) throw new Error("削除失敗");
+    return res.json();
+  })
+  .then(data => {
+  if(!data.error){
+    ids.forEach(id => {
+      const postCard = document.querySelector(`.card[data-post-id='${id}']`);
+      if(postCard) postCard.remove();
+    });
+  } else {
+    alert(data.message || "削除に失敗しました");
+  }
+})
+
+});
+
+
+  // 全削除（Ajax）
+  deleteAllBtn.addEventListener("click", () => {
+  if(!confirm("全ての投稿を削除します。よろしいですか？")) return;
+
+  fetch("{% url 'blog:delete_all_posts' %}", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.status === 'success'){
+      // ログインユーザーの投稿だけ消す
+      document.querySelectorAll(`.card[data-post-id]`).forEach(card => {
+        // 投稿者名を埋め込んでいるならdata属性やクラスから判定
+        // 例えばカードに data-author-id="{{ post.author.id }}" を付ける
+        const authorId = card.dataset.authorId;
+        if(authorId === "{{ user.id }}"){ // 自分の投稿だけ消す
+          card.remove();
+        }
+      });
+
+      // 全部消えたか確認してメッセージを出す
+      if(document.querySelectorAll(`.card[data-post-id][data-author-id="{{ user.id }}"]`).length === 0){
+        postsContainer.insertAdjacentHTML('beforeend','<p class="text-center">あなたの投稿はありません。</p>');
+      }
+
+    } else {
+      alert(data.message || "削除に失敗しました。");
+    }
+  })
+  .catch(err => console.error("全削除エラー:", err));
+});
+
+
+  // いいねボタン
+  document.querySelectorAll(".like-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const postId = btn.dataset.postId;
+      fetch("{% url 'blog:post_like' pk=0 %}".replace('0', postId), {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}",
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(!data.error){
+          const icon = btn.querySelector("i");
+          if(data.is_liked){
+            icon.classList.remove("fa-regular");
+            icon.classList.add("fa-solid", "text-primary");
+          } else {
+            icon.classList.remove("fa-solid", "text-primary");
+            icon.classList.add("fa-regular");
+          }
+          const countSpan = btn.querySelector(".likes-count");
+          if(countSpan) countSpan.textContent = data.likes_count;
+        }
+      })
+      .catch(err => console.error("いいね更新エラー:", err));
+    });
+  });
+
+});
+</script>
+
+<style>
+.posts-wrapper {
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+</style>
+{% endblock %}

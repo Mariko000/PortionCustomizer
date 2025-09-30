@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <article>
+        <h1 class="mb-3">{{ post.title }}</h1>
+        <p class="text-muted">
+            <small>
+                投稿者: {{ post.author.username }} | {{ post.created_at|date:"Y年m月d日 H:i" }}
+            </small>
+        </p>
+
+        {% if post.image %}
+        <img src="{{ post.image.url }}" class="img-fluid rounded mb-4" alt="{{ post.title }}">
+        {% endif %}
+
+        <div class="post-content">
+            <p>{{ post.content|linebreaksbr }}</p>
+        </div>
+
+        <!-- 最新運動ログ1件表示 -->
+        {% if user.is_authenticated and exercise_logs %}
+        <div class="mb-4 mt-5">
+            <h3>あなたの最新運動ログ</h3>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ exercise_logs.0.date }} {{ exercise_logs.0.time }}</strong>：
+                        {{ exercise_logs.0.exercise.name }}
+                    </div>
+                    <div>
+                        {% if exercise_logs.0.comments.count %}
+                            <span class="badge bg-primary rounded-pill">{{ exercise_logs.0.comments.count }} コメント</span>
+                        {% endif %}
+                    </div>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+
+         <!-- タグ -->
+         {% if post.tags.all %}
+         <p>
+             <strong>タグ:</strong>
+             {% for tag in post.tags.all %}
+                 <span class="badge bg-secondary">{{ tag.name }}</span>
+                 {% if not forloop.last %}, {% endif %}
+             {% endfor %}
+         </p>
+     {% else %}
+         <p>タグ: タグなし</p>
+     {% endif %}
+
+     <p>DEBUG: post.pk = {{ post.pk }}</p>
+        <!-- いいね機能の表示とボタン -->
+        <div class="d-flex align-items-center mb-3">
+            <button class="btn btn-link text-decoration-none p-0 me-2 post-like-btn" data-post-id="{{ post.pk }}">
+                {% if is_liked %}
+                    <i class="fa-solid fa-thumbs-up text-primary"></i>
+                {% else %}
+                    <i class="fa-regular fa-thumbs-up"></i>
+                {% endif %}
+            </button>
+            <span class="likes-count">{{ post.likes.count }}</span>
+        </div>
+        
+
+        <!-- 投稿者のみ編集・削除ボタンを表示 -->
+        {% if user.is_authenticated and user == post.author %}
+        <div class="mt-4">
+            <a href="{% url 'blog:post_edit' pk=post.pk %}" class="btn btn-primary me-2">編集</a>
+        </div>
+        {% endif %}
+
+    </article>
+
+    <hr class="my-5">
+
+    <!-- コメントセクション -->
+    <section id="comments">
+        <h2 class="mb-3">コメント ({{ post.comments.count }})</h2>
+        
+        <!-- コメントリスト -->
+        {% if post.comments.all %}
+            {% for comment in post.comments.all %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <p class="mb-1"><strong>{{ comment.author.username }}</strong> <small class="text-muted">{{ comment.created_at|date:"Y年m月d日 H:i" }}</small></p>
+                    <p class="mb-0">{{ comment.text|linebreaksbr }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center">まだコメントがありません。</p>
+        {% endif %}
+
+        <!-- コメントフォーム -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">コメントを投稿する</h5>
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'comments:add_comment' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="content_type_id" value="{{ post.content_type.pk }}">
+                    <input type="hidden" name="object_id" value="{{ post.pk }}">
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3">投稿</button>
+                </form>
+                {% else %}
+                <p>コメントを投稿するには<a href="{% url 'account_login' %}">ログイン</a>が必要です。</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- 投稿リストに戻るボタン -->
+    <div class="text-center my-4">
+        <a href="{% url 'blog:post_list' %}" class="btn btn-outline-secondary">投稿リストに戻る</a>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+      const csrftoken = getCookie('csrftoken');
+    
+      document.querySelectorAll(".post-like-btn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          const postId = btn.dataset.postId;
+    
+          try {
+            const res = await fetch(`/blog/post/${postId}/like/`, {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": csrftoken,
+                "X-Requested-With": "XMLHttpRequest",
+              },
+            });
+    
+            let data;
+            const contentType = res.headers.get("content-type") || "";
+            if (contentType.includes("application/json")) {
+              data = await res.json();
+            } else {
+              // JSON でない場合も安全に処理
+              console.warn("JSON 以外のレスポンス:", await res.text());
+              return;
+            }
+    
+            if (!data.error) {
+              const icon = btn.querySelector("i");
+              const countSpan = btn.nextElementSibling;
+    
+              if (data.is_liked) {
+                icon.classList.remove("fa-regular");
+                icon.classList.add("fa-solid", "text-primary");
+              } else {
+                icon.classList.remove("fa-solid", "text-primary");
+                icon.classList.add("fa-regular");
+              }
+    
+              if (countSpan) countSpan.textContent = data.likes_count;
+            } else {
+              console.error("いいねエラー:", data.error);
+            }
+          } catch (err) {
+            console.error("Fetch でエラー:", err);
+          }
+        });
+      });
+    });
+    </script>
+    
+    
+    
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}他ユーザープロフィール{% endblock %}
+
+{% block content %}
+<!--JavaScript（AJAX）のみでフォロー・アンフォローの処理を行う-->
+<main>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+          <h2>{{ profile_user.username }} のプロフィール</h2>
+
+          <div class="text-center mb-4">
+            {% if profile_user.avatar %}
+              <img src="{{ profile_user.avatar_thumbnail.url }}" 
+                   alt="{{ profile_user.username }}" 
+                   style="width:80px; height:80px; border-radius:50%; object-fit:cover;">
+            {% else %}
+              <img src="{% static 'images/default_avatar.svg' %}" 
+                   alt="{{ profile_user.username }}" 
+                   style="width:80px; height:80px; border-radius:50%; object-fit:cover;">
+            {% endif %}
+          </div>
+          
+
+     <p><strong>自己紹介:</strong> {{ profile_user.bio|default:"まだ自己紹介がありません。" }}</p>
+
+     <p><strong>興味のあるタグ:</strong>
+     {% if user_tags %}
+       {% for ut in user_tags %}
+         <span class="badge bg-primary">{{ ut.tag.name }}</span>
+       {% endfor %}
+     {% else %}
+       <span>タグはまだ登録されていません</span>
+     {% endif %}
+     </p>
+     
+
+<p>
+  フォロワー: <span id="followers-count">{{ followers_count }}</span> /
+  フォロー: {{ following_count }}
+</p>
+
+{% if request.user.is_authenticated and request.user != profile_user %}
+  <div id="follow-container">
+    {% if is_following %}
+      <button id="follow-button" data-user-id="{{ profile_user.id }}" class="btn btn-secondary">フォロー中</button>
+    {% else %}
+      <button id="follow-button" data-user-id="{{ profile_user.id }}" class="btn btn-primary">フォロー</button>
+    {% endif %}
+  </div>
+{% endif %}
+
+
+<hr>
+
+<h3>投稿リスト</h3>
+{% for post in posts %}
+  <div class="post">
+    {% if post.url %}
+      <a href="{{ post.url }}" target="_blank">{{ post.url }}</a>
+    {% endif %}
+    {% if post.image %}
+      <div><img src="{{ post.image.url }}" alt="投稿画像" style="max-width:300px;"></div>
+    {% endif %}
+    {% if post.content %}
+      <p>{{ post.content }}</p>
+    {% endif %}
+    <small>{{ post.created_at }}</small>
+  </div>
+{% empty %}
+  <p>まだ投稿はありません</p>
+{% endfor %}
+</div>
+</div>
+</div>
+</main>
+
+<script>
+    // ... 既存のJavaScriptコードをそのまま使用 ...
+    document.addEventListener('DOMContentLoaded', function() {
+        const followButton = document.getElementById('follow-button');
+        const followersCountSpan = document.getElementById('followers-count');
+        
+        if (followButton && followersCountSpan) {
+            const userId = followButton.dataset.userId;
+
+            followButton.addEventListener('click', function() {
+                const isFollowing = this.textContent === 'フォロー中';
+                const url = isFollowing 
+                ? `/followers/api/unfollow/${userId}/`
+                : `/followers/api/follow/${userId}/`;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) { // メッセージがあれば成功と見なす
+                        if (isFollowing) {
+                            followButton.textContent = 'フォロー';
+                            followButton.classList.remove('btn-secondary');
+                            followButton.classList.add('btn-primary');
+                        } else {
+                            followButton.textContent = 'フォロー中';
+                            followButton.classList.remove('btn-primary');
+                            followButton.classList.add('btn-secondary');
+                        }
+                    }
+                    if (data.followers_count !== undefined) {
+                        followersCountSpan.textContent = data.followers_count;
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch Error:', error);
+                });
+            });
+        }
+    
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    }); 
+</script>
+{% endblock %}

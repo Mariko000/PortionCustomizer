@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}投稿フォーム{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="text-center mb-4">
+                {% if form.instance.pk %}投稿を編集{% else %}新しい投稿を作成{% endif %}
+            </h1>
+
+            <div class="card p-4">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- タイトル -->
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">タイトル:</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger small mt-1">{{ form.title.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- 本文 -->
+                    <div class="mb-3">
+                        <label for="{{ form.content.id_for_label }}" class="form-label">本文:</label>
+                        {{ form.content }}
+                        {% if form.content.errors %}
+                            <div class="text-danger small mt-1">{{ form.content.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- 最新運動ログ1件だけ表示 -->
+                    {% if user.is_authenticated and exercise_logs %}
+                    <div class="mb-4 mt-5">
+                        <h3>あなたの最新運動ログ（日記）</h3>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ exercise_logs.0.date }} {{ exercise_logs.0.time }}</strong>：
+                                    {{ exercise_logs.0.exercise.name }}
+                                </div>
+                                {% if exercise_logs.0.comments.count %}
+                                    <span class="badge bg-primary rounded-pill">{{ exercise_logs.0.comments.count }} コメント</span>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <p>まだ運動ログはありません。</p>
+                    {% endif %}
+
+                    <!-- 画像 -->
+                    <div class="mb-3">
+                        <label for="{{ form.image.id_for_label }}" class="form-label">画像:</label>
+                        {{ form.image }}
+                        {% if form.image.errors %}
+                            <div class="text-danger small mt-1">{{ form.image.errors|striptags }}</div>
+                        {% endif %}
+                        {% if form.instance.image %}
+                        <div class="mt-2">
+                            <p>現在の画像:</p>
+                            <img src="{{ form.instance.image.url }}" alt="現在の画像" class="img-fluid rounded">
+                            <div class="form-check mt-2">
+                                <input type="checkbox" name="image-clear" id="image-clear" class="form-check-input">
+                                <label class="form-check-label" for="image-clear">画像を削除</label>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- タグ -->
+                    <div class="mb-3">
+                        <label for="{{ form.tags.id_for_label }}" class="form-label">タグ:</label>
+                        {{ form.tags }}
+                        <div class="form-text text-muted">{{ form.tags.help_text }}</div>
+                        {% if form.tags.errors %}
+                            <div class="text-danger small mt-1">{{ form.tags.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- ボタン -->
+                    <div class="d-grid gap-2 d-md-block mt-3">
+                        <button type="submit" class="btn btn-success">保存</button>
+                        <a href="{% url 'blog:post_list' %}" class="btn btn-secondary">キャンセル</a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

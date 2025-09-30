@@ -1,0 +1,36 @@
+<footer class="navbar navbar-expand-lg site-footer">
+    <div class="container d-flex justify-content-between align-items-baseline"> 
+
+        <ul class="list-unstyled d-flex mb-0">
+            <li class="mx-3"><a class="text-muted text-decoration-none" href="{% url 'blog:post_list' %}">Post</a></li>
+            <li class="mx-3"><a class="text-muted text-decoration-none" href="http://localhost:5174/">Main</a></li>
+            <li class="mx-3"><a class="text-muted text-decoration-none" href="{% url 'users:user_list_page' %}">Find Friends</a></li>
+            <li class="mx-3"><a class="text-muted text-decoration-none" href="{% url 'contact:contact' %}">Contact</a></li>
+        </ul>
+
+        <div class="d-flex align-items-baseline">
+            <div class="d-flex social-icons me-3">
+                <a href="https://github.co.jp/" class="mx-2 text-muted"><i class="fab fa-github fa-lg"></i></a>
+                <a href="https://x.com/" class="mx-2 text-muted"><i class="fab fa-x-twitter fa-lg"></i></a>
+                <a href="https://www.instagram.com/" class="mx-2 text-muted"><i class="fab fa-instagram fa-lg"></i></a>
+                <a href="https://www.youtube.com/" class="mx-2 text-muted"><i class="fa-brands fa-youtube"></i></a>
+            </div>
+            <p class="mb-0 text-muted"><small>&copy; 2025 MARIKO WAKABAYASHI. All Rights Reserved.</small></p>
+        </div>
+        
+    </div>
+</footer>
+
+<style>
+.social-icons {
+    margin-left: 0 !important;
+}
+
+
+.text-muted span {
+    font-size: 0.8rem; /* 親要素と同じサイズにする */
+    line-height: 1; /* 行の高さを調整して、垂直方向の位置を揃える */
+}
+
+
+</style>
