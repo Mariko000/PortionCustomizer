@@ -1,57 +1,59 @@
 # FitSpin
 
-FitSpin はフィットネス管理アプリです。
+PortionCustomizerはレシピ調整補助のためのアプリです。
+
 
 ## 特徴
-- ワークアウトの記録
-- タイマー機能
-- ステータス管理
+- 開発中
 
 ## インストール
 
-1. リポジトリをクローン
-```bash
-git clone https://github.com/Mariko000/FitSpin.git
-cd FitSpin
+# ==============================================
+# Mac / Linux 用 必須コマンド集
+# （Python + Node + Redis + Django 開発環境）
+# ==============================================
 
-仮想環境作成
-python -m venv env
-
-仮想環境をアクティベート
+# 1. 仮想環境作成 & 有効化
+python3 -m venv env
 source env/bin/activate
 
-必要パッケージをインストール
+# 2. pip を最新にアップグレード
+pip install --upgrade pip
 
+# 3. Python パッケージ一括インストール
+pip install django==5.1.1 \
+djangorestframework \
+django-cors-headers \
+django-allauth \
+django-crispy-forms \
+crispy-bootstrap5 \
+django-imagekit \
+django-webpush \
+django-profanity-filter \
+pillow \
+celery \
+redis \
+python-dotenv \
+black \
+isort \
+flake8
 
-pip install -r requirements.txt
-サードパーティパッケージ
-django
+# 4. Node.js インストール（Homebrew）
+brew install node
 
-django-imagekit (画像の自動リサイズや処理)
-
-django-webpush (プッシュ通知)
-
-djangorestframework (REST API 開発用)
-
-django-cors-headers (CORS 設定)
-
-django-allauth (SNS 認証 / ユーザー管理)
-
-django-crispy-forms (フォームの見た目整形)
-
-crispy-bootstrap5 (Bootstrap5 用テンプレートパック)
-
-celery (非同期タスク)
-
-redis (Celery ブローカー)
-
-profanity-filter (不適切ワードチェック)
-
-Vue.js 側で Font Awesome を使う場合：
-npm install --save @fortawesome/fontawesome-free
-
-Vue.js の依存関係をインストール
+# 5. Vue プロジェクト依存インストール
+cd vue-contents
 npm install
+npm run dev   # 開発用サーバー起動
+
+# 6. Redis 起動（Celery 用）
+brew install redis
+brew services start redis
+
+# 7. Django 初期設定
+python manage.py migrate
+python manage.py createsuperuser  # 必要に応じて
+python manage.py runserver
 
 使い方
 Django 開発サーバー
