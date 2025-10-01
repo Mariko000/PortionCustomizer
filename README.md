@@ -1,4 +1,4 @@
-# FitSpin
+# PortionCustomizer
 
 PortionCustomizerはレシピ調整補助のためのアプリです。
 
